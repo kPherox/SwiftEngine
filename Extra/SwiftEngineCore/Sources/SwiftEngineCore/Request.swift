@@ -1,5 +1,4 @@
 import Foundation
-import SwiftyJSON
 
 
 public typealias RouteParams = [String : Any]
@@ -59,18 +58,16 @@ public extension CIDictionary where Key == String {
             }
         }
     }
+
 }
 
 
 public class RequestBody {
+
     public let data : Data
 
     lazy private(set) public var string : String? = {
         return String(data: self.data, encoding: String.Encoding.utf8)
-    }()
-
-    lazy private(set) public var json : JSON? = {
-        return JSON(data: self.data)
     }()
 
     init(data: Data){
