@@ -74,7 +74,10 @@ public class RequestBody {
         self.data = data
     }
 
-
+    public func json<T>(_ type: T.Type) throws -> T where T : Decodable {
+        let decoder = JSONDecoder()
+        return try decoder.decode(type, from: self.data)
+    }
 
 }
 
