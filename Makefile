@@ -1,4 +1,6 @@
 swift_version = 4.1.3
+swift_dev_date = 2018-08-26
+use_dev = false
 UNAME = $(shell uname)
 TMP_DIR = /tmp
 swift = /opt/apple/swift-latest/usr/bin/swift
@@ -54,9 +56,13 @@ ifneq ($(runner), root)
 	@echo "Must run as root user"
 else
 ifeq ($(UNAME), Linux)
-ifeq ($(shell test "$(shell lsb_release -r -s)" = 14.04  -o  \
-                   "$(shell lsb_release -r -s)" = 16.04  -o  \
-                   "$(shell lsb_release -r -s)" = 16.10  &&  printf "true"),true)
+ifeq ($(shell test "$(use_dev)" = "true"  -o  \
+                   "$(shell lsb_release -r -s)" = 18.04  &&  printf "true"),true)
+	make use_dev=true install-dependencies-linux
+	make setup-system
+else ifeq ($(shell test "$(shell lsb_release -r -s)" = 14.04  -o  \
+                        "$(shell lsb_release -r -s)" = 16.04  -o  \
+                        "$(shell lsb_release -r -s)" = 16.10  &&  printf "true"),true)
 	make install-dependencies-linux
 	make setup-system
 else
@@ -74,18 +80,24 @@ endif
 install-dependencies-linux: 
 	$(eval ubuntu_version = $(shell lsb_release -r -s))
 	$(eval short_ubuntu_version = $(shell echo $(ubuntu_version) | tr --delete .))
+ifeq ($(shell test "$(use_dev)" = "true"  &&  printf "true"),true)
+	$(eval swift_download_source = "https://swift.org/builds/development/ubuntu$(short_ubuntu_version)/swift-DEVELOPMENT-SNAPSHOT-$(swift_dev_date)-a/swift-DEVELOPMENT-SNAPSHOT-$(swift_dev_date)-a-ubuntu$(ubuntu_version).tar.gz" )
+	$(eval swift_source_name = "swift-DEVELOPMENT-SNAPSHOT-$(swift_dev_date)-a-ubuntu")
+else
 	$(eval swift_download_source = "https://swift.org/builds/swift-$(swift_version)-release/ubuntu$(short_ubuntu_version)/swift-$(swift_version)-RELEASE/swift-$(swift_version)-RELEASE-ubuntu$(ubuntu_version).tar.gz" )
+	$(eval swift_source_name = "swift-$(swift_version)-RELEASE-ubuntu")
+endif
 	make install-cleanup-ubuntu
 	apt-get -y install git cmake ninja-build clang python uuid-dev libicu-dev icu-devtools libbsd-dev libedit-dev libxml2-dev libsqlite3-dev swig libpython-dev libncurses5-dev pkg-config libblocksruntime-dev libcurl4-openssl-dev systemtap-sdt-dev tzdata rsync
 	apt-get -y install libz-dev
-	wget $(swift_download_source) -O $(TMP_DIR)/swift-$(swift_version)-RELEASE-ubuntu.tar.gz
-	mkdir -p $(TMP_DIR)/swift-$(swift_version)-RELEASE-ubuntu 
-	tar -xvzf $(TMP_DIR)/swift-$(swift_version)-RELEASE-ubuntu.tar.gz --directory $(TMP_DIR)/swift-$(swift_version)-RELEASE-ubuntu --strip-components=1
+	wget $(swift_download_source) -O $(TMP_DIR)/$(swift_source_name).tar.gz
+	mkdir -p $(TMP_DIR)/$(swift_source_name)
+	tar -xvzf $(TMP_DIR)/$(swift_source_name).tar.gz --directory $(TMP_DIR)/$(swift_source_name) --strip-components=1
 	rm -rf /opt/apple/swift-$(swift_version)
 	mkdir -p /opt/apple/swift-$(swift_version)
-	mv $(TMP_DIR)/swift-$(swift_version)-RELEASE-ubuntu/usr /opt/apple/swift-$(swift_version)/usr
+	mv $(TMP_DIR)/$(swift_source_name)/usr /opt/apple/swift-$(swift_version)/usr
 	ln -s /opt/apple/swift-$(swift_version) /opt/apple/swift-latest
-	make install-cleanup-ubuntu
+	make use_dev=$(use_dev) install-cleanup-ubuntu
 
 install-dependencies-mac: 
 	make install-cleanup-mac
@@ -107,8 +119,13 @@ install-cleanup-mac:
 	rm -rf $(TMP_DIR)/swift-$(swift_version)-RELEASE-osx
 
 install-cleanup-ubuntu:
-	rm -rf $(TMP_DIR)/swift-$(swift_version)-RELEASE-ubuntu.tar.gz
-	rm -rf $(TMP_DIR)/swift-$(swift_version)-RELEASE-ubuntu
+ifeq ($(shell test "$(use_dev)" = "true"  &&  printf "true"),true)
+	$(eval swift_source_name = "swift-DEVELOPMENT-SNAPSHOT-$(swift_dev_date)-a-ubuntu")
+else
+	$(eval swift_source_name = "swift-$(swift_version)-RELEASE-ubuntu")
+endif
+	rm -rf $(TMP_DIR)/$(swift_source_name).tar.gz
+	rm -rf $(TMP_DIR)/$(swift_source_name)
 
 setup-system:
 	mkdir -p /etc/swiftengine
