@@ -20,18 +20,18 @@ func main(){
     let seRoute = SERoute()
     let seResponse = SEResponse()
     if seRoute.doesRouterExist() {
-        
+        SECompiler.excuteRequest(path: "\(SEGlobals.DOCUMENT_ROOT)/Router.swift")
     }
     else {
-      let (excutableType, excutePath) = seRoute.getExecutableType(fileRequest)
-      switch excutableType {
-        case .swift:
-            SECompiler.excuteRequest(path: excutePath)
-        case .staticFile:
-            seResponse.processStaticFile(path: excutePath)
-        default:
-            seResponse.fileNotFound(excutePath)
-      }
+        let (excutableType, excutePath) = seRoute.getExecutableType(fileRequest)
+        switch excutableType {
+            case .swift:
+                SECompiler.excuteRequest(path: excutePath)
+            case .staticFile:
+                seResponse.processStaticFile(path: excutePath)
+            default:
+                seResponse.fileNotFound(excutePath)
+        }
     }
 }
 
