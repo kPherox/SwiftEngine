@@ -43,10 +43,12 @@ class SEShell {
                 ]
         task.environment = env
         var vArgs = args
-		task.launchPath = vArgs[0] //"/usr/bin/env"
+		task.executableURL = URL(fileURLWithPath: vArgs[0] /*"/usr/bin/env"*/)
+		//task.launchPath = vArgs[0] //"/usr/bin/env"
         vArgs.remove(at:0)
 		task.arguments = vArgs
-		task.launch()
+		try! task.run()
+		//task.launch()
 		task.waitUntilExit()
         
         let dataStdOut = pipeStdOut.fileHandleForReading.readDataToEndOfFile()
@@ -83,9 +85,11 @@ class SEShell {
         task.standardOutput = pipeStdOut
         task.standardError = pipeStdErr
         
-        task.launchPath = "/usr/bin/env"
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        //task.launchPath = "/usr/bin/env"
         task.arguments = ["/bin/bash","-c", cmd]//args
-        task.launch()
+        try! task.run()
+        //task.launch()
         task.waitUntilExit()
         
         let dataStdOut = pipeStdOut.fileHandleForReading.readDataToEndOfFile()

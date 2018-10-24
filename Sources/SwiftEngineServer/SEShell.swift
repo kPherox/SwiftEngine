@@ -39,8 +39,10 @@ class SEShell{
                 task.launch()
             }
         #elseif os(Linux)
-            task.launchPath = "/usr/bin/env"
-            task.launch()
+            task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+            //task.launchPath = "/usr/bin/env"
+            try! task.run()
+            //task.launch()
         #endif
         task.waitUntilExit()
         let dataStdOut = pipeStdOut.fileHandleForReading.readDataToEndOfFile()
@@ -81,8 +83,10 @@ class SEShell{
                     task.launch()
                 }
             #elseif os(Linux)
-                task.launchPath = "/usr/bin/env"
-                task.launch()
+                task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+                //task.launchPath = "/usr/bin/env"
+                try! task.run()
+                //task.launch()
             #endif
             task.waitUntilExit()
             let dataStdOut = pipeStdOut.fileHandleForReading.readDataToEndOfFile()

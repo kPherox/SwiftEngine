@@ -5,7 +5,7 @@ import NIOHTTP1
 public enum SEHTTPDataPart<RequestT: Equatable, ResponseT: Equatable> {
 	case request(RequestT)
 	case response(ResponseT)
-	case end()
+	case end(Void)
 }
 
 extension SEHTTPDataPart: Equatable {
